@@ -1,6 +1,7 @@
 NUM_WORKER_NODES=2
 IP_NW="10.0.0."
 IP_START=10
+IP_REGISTRY=100
 
 Vagrant.configure("2") do |config|
   config.vm.provision "shell", env: {"IP_NW" => IP_NW, "IP_START" => IP_START}, inline: <<-SHELL
@@ -14,7 +15,6 @@ Vagrant.configure("2") do |config|
   config.vm.box_check_update = true
 
   config.vm.define "master" do |master|
-    # master.vm.box = "bento/ubuntu-18.04"
     master.vm.hostname = "master-node"
     master.vm.network "private_network", ip: IP_NW + "#{IP_START}"
     master.vm.provider "virtualbox" do |vb|
@@ -38,5 +38,16 @@ Vagrant.configure("2") do |config|
     node.vm.provision "shell", path: "scripts/node.sh"
   end
 
+  end
+
+  config.vm.define "registry" do |registry|
+    registry.vm.hostname = "registry-node"
+    registry.vm.network "private_network", ip: IP_NW + "#{IP_REGISTRY}"
+    registry.vm.disk :disk, size: "40GB", primary: true
+    registry.vm.provider "virtualbox" do |vb|
+        vb.memory = 2048
+        vb.cpus = 2
+    end
+    registry.vm.provision "shell", path: "scripts/registry.sh"
   end
 end 
